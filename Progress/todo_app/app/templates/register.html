@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block auth_content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Create account</h1>
+            <p>Get started for free</p>
+        </div>
+        <div class="auth-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.username.label }}
+                    {{ form.username(placeholder="Username") }}
+                    {% if form.username.errors %}<div class="error">{{ form.username.errors[0] }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label }}
+                    {{ form.email(placeholder="Email") }}
+                    {% if form.email.errors %}<div class="error">{{ form.email.errors[0] }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.password.label }}
+                    {{ form.password(placeholder="Password") }}
+                    {% if form.password.errors %}<div class="error">{{ form.password.errors[0] }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.confirm_password.label }}
+                    {{ form.confirm_password(placeholder="Confirm password") }}
+                    {% if form.confirm_password.errors %}<div class="error">{{ form.confirm_password.errors[0] }}</div>{% endif %}
+                </div>
+                {{ form.submit(class="btn btn-primary", style="width: 100%;") }}
+            </form>
+        </div>
+        <div class="auth-footer">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a>
+    </div>
+</div>
+{% endblock %}

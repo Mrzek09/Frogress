@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Page Not Found{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 100px 20px;">
+    <div style="font-size: 72px; margin-bottom: 24px;">🔍</div>
+    <h1 style="font-size: 32px; margin-bottom: 16px; color: var(--dark);">Page Not Found</h1>
+    <p style="color: var(--gray); margin-bottom: 32px;">The page you're looking for doesn't exist or has been moved.</p>
+    <a href="{{ url_for('main.index') if current_user.is_authenticated else url_for('auth.login') }}" class="btn btn-primary">
+        Go Home
+    </a>
+</div>
+{% endblock %}

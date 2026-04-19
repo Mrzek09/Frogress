@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Analytics</h1>
+    <p class="page-subtitle">Track your progress</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">📊</div>
+        <div class="stat-value">{{ stats.total_tasks }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: var(--success-light); color: var(--success);">✅</div>
+        <div class="stat-value">{{ stats.completed_tasks }}</div>
+        <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">⏱️</div>
+        <div class="stat-value">{{ stats.total_pomodoros }}</div>
+        <div class="stat-label">Focus Sessions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fce7f3; color: #ec4899;">🔥</div>
+        <div class="stat-value">{{ stats.streak }}</div>
+        <div class="stat-label">Day Streak</div>
+    </div>
+</div>
+
+<div class="chart-section">
+    <div class="chart-card">
+        <h3 class="chart-title">Weekly Activity</h3>
+        <div class="chart-bars">
+            {% for day in weekly_data %}
+            <div class="chart-bar-wrapper">
+                <div class="chart-bar" style="height: {{ [day.created * 10, 150]|min }}px;"></div>
+                <span class="chart-label">{{ day.date.strftime('%a') }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="chart-card">
+        <h3 class="chart-title">Categories</h3>
+        <div class="category-list">
+            {% for cat in categories %}
+            <div class="category-item">
+                <span class="category-icon">{{ cat.icon }}</span>
+                <span class="category-name">{{ cat.name }}</span>
+                <span class="category-count">{{ cat.task_count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

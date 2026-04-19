@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tasks{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --primary-light: #1e3a5f;
+            --success-light: #064e3b;
+            --warning-light: #78350f;
+            --danger-light: #7f1d1d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; line-height: 1.5; transition: 0.3s; overflow-y: auto; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-hover); }
+        
+        /* Layout */
+        .app-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border); padding: 24px 16px; position: fixed; height: 100vh; transition: 0.3s; overflow-y: auto; }
+        .main-content { flex: 1; margin-left: 260px; padding: 24px 32px; max-width: calc(100% - 260px); overflow-y: auto; }
+        
+        /* Logo */
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+        .logo-icon { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; }
+        .logo-text { font-size: 20px; font-weight: 700; }
+        
+        /* User */
+        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius); margin-bottom: 24px; }
+        .user-avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-name { font-weight: 600; font-size: 14px; }
+        
+        /* Navigation */
+        .nav-section { margin-bottom: 24px; }
+        .nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; padding: 0 12px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .nav-item.active { background: var(--primary); color: white; }
+        .nav-item .count { margin-left: auto; font-size: 12px; background: var(--bg-tertiary); padding: 2px 8px; border-radius: 10px; }
+        .nav-item.active .count { background: rgba(255,255,255,0.2); }
+        
+        /* Nav Section Labels (clickable) */
+        .nav-label { display: flex; align-items: center; justify-content: space-between; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; padding: 0 12px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .nav-label:hover { color: var(--text-primary); }
+        .nav-label::after { content: '▼'; font-size: 8px; transition: transform 0.2s; }
+        .nav-label.collapsed::after { transform: rotate(-90deg); }
+        .nav-section > div:not(.nav-label) { overflow: hidden; transition: all 0.3s ease; }
+        .nav-section > div:not(.nav-label).collapsed { display: none; }
+        
+        /* Theme Toggle */
+        .theme-toggle { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius); margin-bottom: 16px; }
+        .theme-label { font-size: 13px; color: var(--text-secondary); }
+        .toggle-btn { width: 44px; height: 24px; background: var(--border); border: none; border-radius: 12px; cursor: pointer; position: relative; transition: 0.3s; }
+        .toggle-btn::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        [data-theme="dark"] .toggle-btn { background: var(--primary); }
+        [data-theme="dark"] .toggle-btn::after { left: 23px; }
+        
+        /* Streak */
+        .streak-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--warning-light); color: var(--warning); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; margin-bottom: 16px; }
+        
+        /* Page Header */
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .page-title { font-size: 28px; font-weight: 700; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg-secondary); padding: 10px 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+        .search-box input { border: none; background: none; outline: none; font-size: 14px; width: 160px; }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .stat-icon { width: 44px; height: 44px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        
+        /* Filter Tabs */
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: var(--bg-secondary); padding: 6px; border-radius: var(--radius-lg); width: fit-content; }
+        .filter-tab { padding: 10px 20px; border-radius: var(--radius); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: 0.2s; }
+        .filter-tab:hover { color: var(--text-primary); }
+        .filter-tab.active { background: var(--primary); color: white; }
+        
+        /* Task List */
+        .task-list { display: flex; flex-direction: column; gap: 12px; }
+        .task-card { display: flex; align-items: center; gap: 16px; background: var(--bg-secondary); border: 1px solid var(--border); padding: 16px 20px; border-radius: var(--radius-lg); transition: 0.15s; }
+        .task-card:hover { box-shadow: var(--shadow-md); }
+        .task-card.completed { opacity: 0.6; }
+        .task-card.completed .task-title { text-decoration: line-through; }
+        .task-check { width: 24px; height: 24px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; font-size: 14px; color: white; flex-shrink: 0; }
+        .task-check:hover { border-color: var(--primary); }
+        .task-check.checked { background: var(--success); border-color: var(--success); }
+        .task-content { flex: 1; min-width: 0; }
+        .task-title { font-weight: 500; margin-bottom: 4px; font-size: 15px; }
+        .task-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); }
+        .task-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .tag-high { background: var(--danger-light); color: var(--danger); }
+        .tag-medium { background: var(--warning-light); color: var(--warning); }
+        .tag-low { background: var(--success-light); color: var(--success); }
+        .task-link { color: var(--primary); text-decoration: none; font-size: 14px; }
+        .task-link:hover { text-decoration: underline; }
+        .task-actions { display: flex; gap: 4px; opacity: 0; transition: 0.15s; }
+        .task-card:hover .task-actions { opacity: 1; }
+        .action-btn { width: 32px; height: 32px; border: none; background: var(--bg-tertiary); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: 0.15s; }
+        .action-btn:hover { background: var(--primary); color: white; }
+        .action-btn.delete:hover { background: var(--danger); }
+        
+        /* Empty State */
+        .empty-state { text-align: center; padding: 60px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .empty-text { color: var(--text-muted); margin-bottom: 20px; }
+        
+        /* Auth Pages */
+        .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-primary); }
+        .auth-card { width: 100%; max-width: 400px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+        .auth-header { padding: 32px; text-align: center; border-bottom: 1px solid var(--border); }
+        .auth-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+        .auth-header p { color: var(--text-muted); font-size: 14px; }
+        .auth-body { padding: 32px; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; background: var(--bg-primary); color: var(--text-primary); transition: 0.15s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .form-group .error { color: var(--danger); font-size: 12px; margin-top: 4px; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; }
+        .checkbox-group input { width: 16px; height: 16px; }
+        .checkbox-group label { margin: 0; font-weight: 400; color: var(--text-secondary); }
+        .auth-footer { text-align: center; padding: 20px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text-muted); }
+        .auth-footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.15s; text-decoration: none; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        
+        /* OAuth Buttons */
+        .oauth-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .btn-oauth { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.15s; text-decoration: none; background: var(--bg-secondary); color: var(--text-primary); }
+        .btn-oauth:hover { background: var(--bg-tertiary); border-color: var(--text-muted); }
+        .btn-google { background: #ffffff; color: #333; border-color: #ddd; }
+        .btn-google:hover { background: #f5f5f5; border-color: #ccc; }
+        .btn-facebook { background: #1877F2; color: white; border-color: #1877F2; }
+        .btn-facebook:hover { background: #166FE5; }
+        
+        /* Divider */
+        .divider { display: flex; align-items: center; margin: 20px 0; color: var(--text-muted); font-size: 13px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .divider span { padding: 0 16px; }
+        
+        /* Password Toggle */
+        .password-input-wrapper { position: relative; display: flex; align-items: center; }
+        .password-input-wrapper input { width: 100%; }
+        .password-toggle { position: absolute; right: 12px; cursor: pointer; font-size: 16px; opacity: 0.6; user-select: none; }
+        .password-toggle:hover { opacity: 1; }
+        
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 24px; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 600; }
+        .modal-close { width: 32px; height: 32px; border: none; background: var(--bg-tertiary); border-radius: 6px; cursor: pointer; font-size: 18px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .recurring-options { display: none; margin-top: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius); }
+        .recurring-options.show { display: block; }
+        
+        /* Flash Messages */
+        .flash-messages { margin-bottom: 16px; }
+        .flash { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 8px; font-size: 14px; }
+        .flash-success { background: var(--success-light); color: var(--success); }
+        .flash-danger { background: var(--danger-light); color: var(--danger); }
+        .flash-warning { background: var(--warning-light); color: var(--warning); }
+        .flash-info { background: var(--primary-light); color: var(--primary); }
+        
+        /* Chart Section */
+        .chart-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; }
+        .chart-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+        .chart-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+        .chart-bars { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; gap: 12px; }
+        .chart-bar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .chart-bar { width: 40px; background: var(--primary); border-radius: 6px 6px 0 0; min-height: 10px; }
+        .chart-label { font-size: 12px; color: var(--text-muted); }
+        .category-list { display: flex; flex-direction: column; gap: 12px; }
+        .category-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius); }
+        .category-icon { font-size: 20px; }
+        .category-name { flex: 1; font-size: 14px; }
+        .category-count { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        
+        /* Form Container */
+        .form-container { max-width: 600px; margin: 0 auto; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; max-width: 100%; padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-section { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">T</div>
+                <span class="logo-text">Tasks</span>
+            </div>
+            <div class="user-card">
+                <div class="user-avatar">{{ current_user.username[0]|upper }}</div>
+                <div class="user-name">{{ current_user.username }}</div>
+            </div>
+            <nav class="nav-section">
+                <button class="nav-label" onclick="toggleSection('menu')">Menu</button>
+                <div id="menu-section">
+                    <a href="{{ url_for('main.index') }}" class="nav-item {{ 'active' if filter_type == 'all' else '' }}"><span>📋</span> All <span class="count">{{ stats.total_tasks if stats else 0 }}</span></a>
+                    <a href="{{ url_for('main.index', filter='completed') }}" class="nav-item {{ 'active' if filter_type == 'completed' else '' }}"><span>✅</span> Done <span class="count">{{ stats.completed_tasks if stats else 0 }}</span></a>
+                    <a href="{{ url_for('main.index', filter='today') }}" class="nav-item {{ 'active' if filter_type == 'today' else '' }}"><span>📅</span> Today</a>
+                </div>
+            </nav>
+            <nav class="nav-section">
+                <button class="nav-label" onclick="toggleSection('subjects')">Subjects</button>
+                <div id="subjects-section">
+                    {% for category in categories|default([]) %}
+                    <a href="{{ url_for('main.index', category=category.id) }}" class="nav-item" onclick="event.stopPropagation(); openEditCategory({{ category.id }}, '{{ category.name }}', '{{ category.color }}', '{{ category.icon }}'); return false;"><span>📚</span> {{ category.name }}</a>
+                    {% endfor %}
+                    <button class="nav-item" onclick="openModal('categoryModal')"><span>➕</span> Add</button>
+                </div>
+            </nav>
+            <nav class="nav-section">
+                <button class="nav-label" onclick="toggleSection('settings')">Settings</button>
+                <div id="settings-section">
+                    <div class="theme-toggle">
+                        <span class="theme-label">Dark Mode</span>
+                        <button class="toggle-btn" onclick="toggleTheme()"></button>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-item" style="color: var(--danger);"><span>🚪</span> Logout</a>
+                </div>
+            </nav>
+        </aside>
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages" style="position: fixed; top: 16px; right: 16px; z-index: 1000;">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+            localStorage.setItem('theme', html.getAttribute('data-theme'));
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // Toggle collapsible sections
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId + '-section');
+            const label = document.querySelector(`[onclick="toggleSection('${sectionId}')"]`);
+            if (section && label) {
+                section.classList.toggle('collapsed');
+                label.classList.toggle('collapsed');
+            }
+        }
+        
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); }));
+        
+        function toggleRecurring() { 
+            const el = document.getElementById('recurringOptions');
+            if(el) el.classList.toggle('show', document.getElementById('is_recurring')?.checked);
+        }
+        
+        function toggleTask(id) {
+            fetch(`/api/tasks/${id}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }})
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    const card = document.querySelector(`[data-id="${id}"]`);
+                    if(card) {
+                        card.querySelector('.task-check').classList.toggle('checked', d.is_completed);
+                        card.classList.toggle('completed', d.is_completed);
+                    }
+                }
+            });
+        }
+        
+        function deleteTask(id) {
+            if (confirm('Delete this task?')) {
+                fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        const card = document.querySelector(`[data-id="${id}"]`);
+                        if(card) card.remove();
+                    }
+                });
+            }
+        }
+        
+        function startPomodoro(id) {
+            fetch(`/api/pomodoro/start/${id}`, { method: 'POST' })
+            .then(r => r.json())
+            .then(d => { if (d.success) alert('🍅 Focus session started!'); });
+        }
+        
+        function openEditCategory(id, name, color, icon) {
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('editCategoryName').value = name;
+            document.getElementById('editCategoryColor').value = color || '#3b82f6';
+            document.getElementById('editCategoryIcon').value = icon || '📚';
+            document.getElementById('editCategoryForm').action = `/category/${id}/edit`;
+            openModal('editCategoryModal');
+        }
+        
+        document.getElementById('deleteCategoryBtn')?.addEventListener('click', function() {
+            const id = document.getElementById('editCategoryId').value;
+            if (confirm('Delete this category? Tasks will be unassigned but not deleted.')) {
+                fetch(`/category/${id}/delete`, { method: 'POST' })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        closeModal('editCategoryModal');
+                        location.reload();
+                    }
+                });
+            }
+        });
+        
+        // Category form AJAX
+        document.getElementById('categoryForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('{{ url_for("main.create_category") }}', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    closeModal('categoryModal');
+                    location.reload();
+                }
+            });
+        });
+        
+        // Auto-generate icon based on subject name
+        const subjectIcons = {
+            'math': '🔢', 'mathematics': '🔢', 'algebra': '📐', 'calculus': '∫', 'geometry': '📐',
+            'science': '🔬', 'physics': '⚛️', 'chemistry': '🧪', 'biology': '🧬', 'biology': '🧬',
+            'english': '📖', 'literature': '📚', 'reading': '📖', 'writing': '✍️', 'language': '🗣️',
+            'history': '🏛️', 'social': '🌍', 'geography': '🗺️', 'economics': '💰',
+            'computer': '💻', 'programming': '💻', 'coding': '⌨️', 'cs': '💻', 'ict': '💻',
+            'art': '🎨', 'music': '🎵', 'pe': '⚽', 'gym': '🏋️', 'sports': '⚽',
+            'spanish': '🇪🇸', 'french': '🇫🇷', 'german': '🇩🇪', 'chinese': '🇨🇳', 'japanese': '🇯🇵',
+            'philosophy': '🤔', 'psychology': '🧠', 'law': '⚖️', 'religion': '✝️',
+            'business': '💼', 'marketing': '📊', 'accounting': '🧾'
+        };
+        
+        function autoGenerateIcon() {
+            const name = document.getElementById('subjectName')?.value.toLowerCase().trim() || '';
+            const iconInput = document.getElementById('subjectIcon');
+            if (iconInput) {
+                // Check for keyword matches
+                for (const [key, icon] of Object.entries(subjectIcons)) {
+                    if (name.includes(key)) {
+                        iconInput.value = icon;
+                        return;
+                    }
+                }
+                // Default icon
+                if (!name) iconInput.value = '📚';
+            }
+        }
+        
+        function autoGenerateIconEdit() {
+            const name = document.getElementById('editCategoryName')?.value.toLowerCase().trim() || '';
+            const iconInput = document.getElementById('editCategoryIcon');
+            if (iconInput) {
+                for (const [key, icon] of Object.entries(subjectIcons)) {
+                    if (name.includes(key)) {
+                        iconInput.value = icon;
+                        return;
+                    }
+                }
+            }
+        }
+        
+        // Edit category form AJAX
+        document.getElementById('editCategoryForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editCategoryId').value;
+            const formData = new FormData(this);
+            fetch(`/category/${id}/edit`, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    closeModal('editCategoryModal');
+                    location.reload();
+                }
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

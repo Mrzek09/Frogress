@@ -1,0 +1,9 @@
+flask
+flask-sqlalchemy
+flask-login
+flask-wtf
+email-validator
+python-dotenv
+werkzeug
+pytest
+pytest-flask
